@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem;
 
+
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
@@ -123,5 +124,47 @@ public class FareCalculatorServiceTest {
         fareCalculatorService.calculateFare(ticket);
         assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
     }
+    
+    @Test
+    public void calculateFareCarFreeForLessThanHalfAnHour() {
+    	Date inTime = new Date();
+    	Date outTime = new Date();
+    	outTime.setTime( System.currentTimeMillis() + (  29 * 60 * 1000) ); 
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+        
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        fareCalculatorService.calculateFare(ticket);
+        
+        assertEquals((0 * Fare.CAR_RATE_PER_HOUR) ,ticket.getPrice());
+    	}
 
+
+    @Test
+    public void calculateFareForRecurrentCustomer() {
+    	/*
+    	 *un véhicule dont la plaque est 123456 entre puis sort (temps > 30 minutes) : un ticket est généré au prix normal
+    	 *le même véhicule entre puis sort (temps > 30 minutes) : un ticket est généré avec 5% de remise
+    	 */
+    	//GIVEN
+    	Ticket previousTicket = new Ticket();
+    	previousTicket.setVehicleRegNumber("123456");
+    	
+        Date inTime = new Date();
+        Date outTime = new Date();
+        outTime.setTime( System.currentTimeMillis() + (5 * 60 * 60 * 1000) );
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ticket.setVehicleRegNumber("123456");
+        
+        //WHEN
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        fareCalculatorService.calculateFare(ticket);
+        
+        //THEN                
+        assertEquals((7.125) , ticket.getPrice());
+        
+    	}
 }
