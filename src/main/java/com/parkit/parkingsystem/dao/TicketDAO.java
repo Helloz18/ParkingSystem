@@ -28,6 +28,20 @@ public class TicketDAO {
             //ps.setInt(1,ticket.getId());
             ps.setInt(1,ticket.getParkingSpot().getId());
             ps.setString(2, ticket.getVehicleRegNumber());
+            
+            ticket.setReductionForRecurrentClient(false);
+            PreparedStatement recurrent = con.prepareStatement(DBConstants.RECURRENT);
+            recurrent.setString(1,ticket.getVehicleRegNumber());
+            ResultSet rsRecurrent = recurrent.executeQuery();
+            rsRecurrent.next();
+            int enteredPreviously = rsRecurrent.getInt("count");
+            if(enteredPreviously > 1) {
+            	System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+            	ticket.setReductionForRecurrentClient(true);
+            }
+            dataBaseConfig.closeResultSet(rsRecurrent);
+            dataBaseConfig.closePreparedStatement(recurrent);
+            
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, new Timestamp(ticket.getInTime().getTime()));
             ps.setTimestamp(5, (ticket.getOutTime() == null)?null: (new Timestamp(ticket.getOutTime().getTime())) );
@@ -46,17 +60,18 @@ public class TicketDAO {
         try {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET);
-            //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+            //PARKING_NUMBER, ID, PRICE, IN_TIME, OUT_TIME, PARKING_TYPE)
             ps.setString(1,vehicleRegNumber);
             ResultSet rs = ps.executeQuery();
+            
             
             if(rs.next()){
                 ticket = new Ticket();
                 ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)),false);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setId(rs.getInt(2));
-                ticket.setVehicleRegNumber(vehicleRegNumber);
-                ticket.setPrice(rs.getDouble(3));
+                ticket.setVehicleRegNumber(vehicleRegNumber);                
+               	ticket.setPrice(rs.getDouble(3));               	
                 ticket.setInTime(rs.getTimestamp(4));
                 ticket.setOutTime(rs.getTimestamp(5));
             }

@@ -10,8 +10,17 @@ public class Ticket {
     private double price;
     private Date inTime;
     private Date outTime;
+	public boolean reductionForRecurrentClient;
 
-    public int getId() {
+    public boolean isReductionForRecurrentClient() {
+		return reductionForRecurrentClient;
+	}
+
+	public void setReductionForRecurrentClient(boolean reductionForRecurrentClient) {
+		this.reductionForRecurrentClient = reductionForRecurrentClient;
+	}
+
+	public int getId() {
         return id;
     }
 

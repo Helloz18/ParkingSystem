@@ -142,29 +142,45 @@ public class FareCalculatorServiceTest {
 
 
     @Test
-    public void calculateFareForRecurrentCustomer() {
-    	/*
-    	 *un véhicule dont la plaque est 123456 entre puis sort (temps > 30 minutes) : un ticket est généré au prix normal
-    	 *le même véhicule entre puis sort (temps > 30 minutes) : un ticket est généré avec 5% de remise
-    	 */
+    public void calculateFareForRecurrentCustomer_WithCar() {
     	//GIVEN
-    	Ticket previousTicket = new Ticket();
-    	previousTicket.setVehicleRegNumber("123456");
-    	
-        Date inTime = new Date();
+    	Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  5 * 60 * 60 * 1000) );
         Date outTime = new Date();
-        outTime.setTime( System.currentTimeMillis() + (5 * 60 * 60 * 1000) );
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
-        ticket.setVehicleRegNumber("123456");
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+
         
-        //WHEN
         ticket.setInTime(inTime);
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
+
+        //WHEN
+        ticket.reductionForRecurrentClient = true;
         fareCalculatorService.calculateFare(ticket);
         
         //THEN                
         assertEquals((7.125) , ticket.getPrice());
+        
+    	}
+    
+    @Test
+    public void calculateFareForRecurrentCustomer_WithBike() {
+    	//GIVEN
+    	Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  5 * 60 * 60 * 1000) );
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
+        
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+
+        //WHEN
+        ticket.reductionForRecurrentClient = true;
+        fareCalculatorService.calculateFare(ticket);
+        
+        //THEN                
+        assertEquals((4.75) , ticket.getPrice());
         
     	}
 }
