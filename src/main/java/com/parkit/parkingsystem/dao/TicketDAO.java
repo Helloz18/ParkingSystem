@@ -25,22 +25,22 @@ public class TicketDAO {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-            //ps.setInt(1,ticket.getId());
+           
             ps.setInt(1,ticket.getParkingSpot().getId());
             ps.setString(2, ticket.getVehicleRegNumber());
             
             ticket.setReductionForRecurrentClient(false);
-            PreparedStatement recurrent = con.prepareStatement(DBConstants.RECURRENT);
-            recurrent.setString(1,ticket.getVehicleRegNumber());
-            ResultSet rsRecurrent = recurrent.executeQuery();
-            rsRecurrent.next();
-            int enteredPreviously = rsRecurrent.getInt("count");
-            if(enteredPreviously > 1) {
-            	System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
-            	ticket.setReductionForRecurrentClient(true);
-            }
-            dataBaseConfig.closeResultSet(rsRecurrent);
-            dataBaseConfig.closePreparedStatement(recurrent);
+            	PreparedStatement recurrent = con.prepareStatement(DBConstants.RECURRENT);
+            	recurrent.setString(1,ticket.getVehicleRegNumber());
+            	ResultSet rsRecurrent = recurrent.executeQuery();
+            	rsRecurrent.next();
+            		int enteredPreviously = rsRecurrent.getInt("count");
+            				if(enteredPreviously > 1) {
+            					System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+            					ticket.setReductionForRecurrentClient(true);
+            				}
+            	dataBaseConfig.closeResultSet(rsRecurrent);
+            	dataBaseConfig.closePreparedStatement(recurrent);
             
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, new Timestamp(ticket.getInTime().getTime()));
@@ -102,4 +102,6 @@ public class TicketDAO {
         }
         return false;
     }
+
 }
+

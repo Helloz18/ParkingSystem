@@ -155,7 +155,7 @@ public class FareCalculatorServiceTest {
         ticket.setParkingSpot(parkingSpot);
 
         //WHEN
-        ticket.reductionForRecurrentClient = true;
+        ticket.setReductionForRecurrentClient(true);
         fareCalculatorService.calculateFare(ticket);
         
         //THEN                
@@ -176,7 +176,7 @@ public class FareCalculatorServiceTest {
         ticket.setParkingSpot(parkingSpot);
 
         //WHEN
-        ticket.reductionForRecurrentClient = true;
+        ticket.setReductionForRecurrentClient(true);
         fareCalculatorService.calculateFare(ticket);
         
         //THEN                
