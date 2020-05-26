@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 import org.junit.jupiter.api.AfterAll;
@@ -30,8 +31,11 @@ class TicketDAOTest {
     private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static DataBasePrepareService dataBasePrepareService;
     
+    
     Ticket ticket;
-   
+    @Mock
+    ParkingSpot parkingSpot;
+    
     private static TicketDAO dao;
     
     
@@ -94,7 +98,7 @@ class TicketDAOTest {
 	}	
 	
 	@Test
-	void savingAticket() {
+	void savingAticket() throws ClassNotFoundException, SQLException {
 		//on créé un ticket avec les infos demandées en entrée
 		Ticket ticket = new Ticket();
 		ParkingSpot parkingSpot = new ParkingSpot(3, ParkingType.CAR,false);
@@ -105,8 +109,41 @@ class TicketDAOTest {
 		
 		dao.saveTicket(ticket);
 		
-		assertEquals(2,dao.getTicket("MNOPQR").getId());
+		String requestTicketId = "select id from ticket where VEHICLE_REG_NUMBER = 'MNOPQR'";
+        Connection con = dataBaseTestConfig.getConnection();
+        PreparedStatement ps = con.prepareStatement(requestTicketId); 
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+		int ticketId = rs.getInt("id");
+		
+		assertEquals(2,ticketId);
 	}
 	
+	@Test
+	void gettingAticket() throws ClassNotFoundException, SQLException {
+
+		String requestTicketId = "select id from ticket where VEHICLE_REG_NUMBER = 'MNOPQR'";
+        Connection con = dataBaseTestConfig.getConnection();
+        PreparedStatement ps = con.prepareStatement(requestTicketId); 
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+		int ticketId = rs.getInt("id");
+		
+		dao.getTicket("MNOPQR");
+		
+		assertEquals(2, ticketId);
+	}
+	
+	@Test
+	void updatingAticket() throws ClassNotFoundException, SQLException {
+		String updatingTicket ="update ticket set price = '1.0', OUT_TIME = '2021-05-24 10:29:43' where id = 2";
+		Connection con = dataBaseTestConfig.getConnection();
+		PreparedStatement ps = con.prepareStatement(updatingTicket);
+		ps.execute();
+		
+		dao.updateTicket(dao.getTicket("MNOPQR"));		
+		
+		assertEquals(1.0, dao.getTicket("MNOPQR").getPrice());
+	}
 	
 }
