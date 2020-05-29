@@ -8,17 +8,12 @@ import java.sql.PreparedStatement;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.ParkingSpot;
-import com.parkit.parkingsystem.model.Ticket;
 
-@ExtendWith(MockitoExtension.class)
 class ParkingSpotDAOTest {
 	
 
@@ -33,8 +28,6 @@ class ParkingSpotDAOTest {
     @BeforeEach
     private void setUp() throws Exception{
 
-       // String nextParkingSpot = "select min(PARKING_NUMBER) from parking where AVAILABLE = true and TYPE = ?";
-    	
         parkingSpotDAO = new ParkingSpotDAO();
         parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
         dataBasePrepareService = new DataBasePrepareService();
