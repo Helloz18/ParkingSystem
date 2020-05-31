@@ -1,8 +1,11 @@
 package com.parkit.parkingsystem.util;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+
+import com.parkit.parkingsystem.service.InteractiveShell;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,11 +29,15 @@ class InputReaderUtilTest {
 	 */
 	
 	@Test
-	void aNumberIsEntered() {
-		int input = 2;
+	void aNonExistingNumberIsEntered() {
 		
-		int result = inputReaderUtil.readSelection();
+		//String answerGiven = "^[a-z]{0,1000}$";
 		
-		assertEquals(input , result);
+		InteractiveShell.loadInterface();
+		 when(inputReaderUtil.readSelection()).thenReturn(4);
+	        
+		
+		
+		
 	}
 }

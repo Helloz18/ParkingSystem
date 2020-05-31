@@ -28,7 +28,8 @@ import com.parkit.parkingsystem.model.Ticket;
 @ExtendWith(MockitoExtension.class)
 class TicketDAOTest {
 
-    private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
+    @Mock
+	private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static DataBasePrepareService dataBasePrepareService;
     
     
