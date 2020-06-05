@@ -1,28 +1,37 @@
 package com.parkit.parkingsystem.dao;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
-import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.ParkingSpot;
 
+@ExtendWith(MockitoExtension.class)
 class ParkingSpotDAOTest {
 	
-
-    private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
-    private static DataBasePrepareService dataBasePrepareService;
+	@Mock
+    private static DataBaseTestConfig dataBaseTestConfig;
+    @Mock
+    private Connection con;
+    @Mock
+    private PreparedStatement preparedStatement;
+    @Mock
+    private ResultSet resultSet;
     
-    
-    ParkingSpot parkingSpot;
-       
+    ParkingSpot parkingSpot;     
     private static ParkingSpotDAO parkingSpotDAO;
     
     @BeforeEach
@@ -30,61 +39,56 @@ class ParkingSpotDAOTest {
 
         parkingSpotDAO = new ParkingSpotDAO();
         parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
-        dataBasePrepareService = new DataBasePrepareService();
-      //base de test : indiquer qu'une voiture (1) est garée, et indiquer qu'une moto (4) est garée
-        String requestCar = "update parking set AVAILABLE = '0' where PARKING_NUMBER = 1";
-        String requestBike = "update parking set AVAILABLE = '0' where PARKING_NUMBER = 4";
-        Connection con = dataBaseTestConfig.getConnection();
-        PreparedStatement psCar = con.prepareStatement(requestCar);
-        PreparedStatement psBike = con.prepareStatement(requestBike);
-        psCar.execute();
-        psBike.execute();
-        
+               
+        when(dataBaseTestConfig.getConnection()).thenReturn(con);
+        when(con.prepareStatement(anyString())).thenReturn(preparedStatement);      
        }
-
-    @AfterAll
-    private static void setUpPerTest() throws Exception {
-    	//on vide la base de test après que les tests aient été effectués.
-        dataBasePrepareService.clearDataBaseEntries();
-    }
-
-
-
+	
 	@Test
-	void testNextParkingSpotIsFoundForAcar() {
+	void testNextParkingSpotIsFound() throws SQLException {
+        //quand le preparedStatement GET_NEXT_PARKING_SPOT est appelé
+		//retourne le resultSet
+		//qui renvoie "true" si un emplacement suivant est trouvé
+		when(preparedStatement.executeQuery()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(true);
+
     	int result = parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR);
         
-    	assertEquals(2, result );
-		
+    	assertEquals(0, result ); //la méthode renvoie -1 si la connection echoue donc 0 si elle fonctionne		
 		}
 	
 	@Test
-	void testNextParkingSpotIsFoundForAbike() {
-    	int result = parkingSpotDAO.getNextAvailableSlot(ParkingType.BIKE);
+	void testNextParkingSpotIsFoundforAcar() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(true);
+		when(resultSet.getInt(1)).thenReturn(2);
+
+    	int result = parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR);
         
-    	assertEquals(5, result );
-		
+    	assertEquals(2, result );	
 		}
-	
+		
 	@Test
-	void testUpdateParkingSpotForAcar() {
-        parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
-		
-        parkingSpotDAO.updateParking(parkingSpot);
+	void testUpdateParkingSpotForAcar() throws SQLException {
+		parkingSpot = new ParkingSpot(1,ParkingType.CAR, false);
+        when(preparedStatement.executeUpdate()).thenReturn(1, 1);
         
-        boolean result = parkingSpot.isAvailable();
-		
-		assertFalse(result);
+		boolean result = parkingSpotDAO.updateParking(parkingSpot);	
+        
+		assertTrue(result);
 	}
 	
 	@Test
-	void testUpdateParkingSpotForAbike() {
+	void testUpdateParkingSpotForAbike() throws SQLException {
+		//une moto est garée à l'emplacement 4
 		parkingSpot = new ParkingSpot(4, ParkingType.BIKE,false);
+		//quand le preparedStatement UPDATE_PARKING_SPOT est appelé
+		// dit que le parking est libre (set boolean à 1)
+		// pour l'emplacement 4
+        when(preparedStatement.executeUpdate()).thenReturn(1, 4);
 		
-		parkingSpotDAO.updateParking(parkingSpot);
+		boolean result = parkingSpotDAO.updateParking(parkingSpot);	
 		
-		boolean result = parkingSpot.isAvailable();
-		
-		assertFalse(result);
+		assertTrue(result);
 	}
 }

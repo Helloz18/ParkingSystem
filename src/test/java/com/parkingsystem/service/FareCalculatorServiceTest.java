@@ -1,4 +1,4 @@
-package com.parkit.parkingsystem;
+package com.parkingsystem.service;
 
 
 import com.parkit.parkingsystem.constants.Fare;
