@@ -31,6 +31,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 @ExtendWith(MockitoExtension.class)
@@ -102,13 +103,12 @@ public class ParkingDataBaseIT {
 		  ticket.setPrice(0.0);	 	  	  
 		  ticketDAO.saveTicket(ticket);
 		  
-		  parkingService.processExitingVehicle();		  
-		  //une fois processExitingVehicle() appelé, impossible de récupérer les valeurs de bdd
+		  parkingService.processExitingVehicle();		 
 		  
-		  System.out.println(ticketDAO.getTicket("ABCDEF").getPrice());
-		  System.out.println(ticketDAO.getTicket("ABCDEF"));
-		       
-		  assertNotNull(ticketDAO.getTicket("ABCDEF").getOutTime());	   
+		  DecimalFormat df = new DecimalFormat("###0.00");			
+	
+		  assertEquals("1,50", df.format(ticketDAO.getTicket("ABCDEF").getPrice()));
+		  assertNotNull(ticketDAO.getTicket("ABCDEF").getOutTime());   
 	  }
 	 
 }
