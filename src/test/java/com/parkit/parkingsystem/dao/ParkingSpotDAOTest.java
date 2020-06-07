@@ -91,4 +91,24 @@ class ParkingSpotDAOTest {
 		
 		assertTrue(result);
 	}
+	
+	@Test
+	void testNextParkingSpotIsNotFoundforAcar() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(false);
+
+    	int result = parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR);
+        
+    	assertEquals(-1, result );	
+		}
+	
+	@Test
+	void testUpdateFail() throws SQLException {
+		parkingSpot = new ParkingSpot(4, ParkingType.BIKE,false);
+		when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+		
+		boolean result = parkingSpotDAO.updateParking(parkingSpot);	
+		
+		assertFalse(result);
+	}
 }

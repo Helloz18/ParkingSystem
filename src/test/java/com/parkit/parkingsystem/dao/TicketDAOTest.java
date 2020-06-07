@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.junit.jupiter.api.AfterAll;
@@ -48,58 +49,54 @@ class TicketDAOTest {
     Ticket ticket;
     ParkingSpot parkingSpot;
     
-    private static TicketDAO dao;
+    private static TicketDAO ticketDAO;
     
+    @Mock
+    private static ParkingSpotDAO parkingSpotDAO;
     
     @BeforeEach
     private void setUp() throws Exception{
-        dao = new TicketDAO();
-        dao.dataBaseConfig = dataBaseTestConfig;
-        
+        ticketDAO = new TicketDAO();
+        ticketDAO.dataBaseConfig = dataBaseTestConfig;
+        parkingSpotDAO = new ParkingSpotDAO();
+        parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
         when(dataBaseTestConfig.getConnection()).thenReturn(con);
-        when(con.prepareStatement(anyString())).thenReturn(preparedStatement);
-        
-        Ticket ticket = new Ticket();
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, true);
+        when(con.prepareStatement(anyString())).thenReturn(preparedStatement);      
+
+        //on créé un ticket pour une voiture ABCDEF entrée et sortie.
+        ticket = new Ticket();
+        ticket.setId(1);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true);
+        ParkingSpot parkingSpot = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR, true);
         ticket.setParkingSpot(parkingSpot);
         ticket.setVehicleRegNumber("ABCDEF");
         Date inTime = new Date();
         inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
         ticket.setInTime(inTime);
-        ticket.setPrice(1.5);
+        ticket.setPrice(1.50);
+        ticket.setReductionForRecurrentClient(true);
         Date outTime = new Date();
         ticket.setOutTime(outTime);
-        ticket.setReductionForRecurrentClient(true);
-        
-        //dataBasePrepareService = new DataBasePrepareService();
-        // insertion d'une voiture ABCDEF en base qui est entrée et sortie du parking
-//        String request = "insert into ticket (PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME )values (1, 'ABCDEF' , 1.0,'2020-05-24 09:29:43','2020-05-24 10:29:43')";
-//        String request2 = "update parking set AVAILABLE = '0' where PARKING_NUMBER > 1 && PARKING_NUMBER < 4";
-//        Connection con = dataBaseTestConfig.getConnection();
-//        PreparedStatement ps = con.prepareStatement(request);
-//        PreparedStatement ps2 = con.prepareStatement(request2);
-//        ps.execute();
-//        ps2.execute();
     }
 
-//    @AfterAll
-//    private static void setUpPerTest() throws Exception {
-//    	//on vide la base de test après que les tests aient été effectués.
-//        dataBasePrepareService.clearDataBaseEntries();
-//    }
 
     
   
 	@Test
 	void thisVehicleIsRecurrent() throws Exception {  
 		// creating a new ticket and the vehicle is already in the database  
-        Ticket ticket2 = new Ticket();
-        ticket2.setVehicleRegNumber("ABCDEF");
-        //Act
-        dao.saveTicket(ticket2);
-
+		Ticket ticket = new Ticket();
+		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);		  
+		ticket.setParkingSpot(parkingSpot);
+		ticket.setVehicleRegNumber("ABCDEF");			 
+		Date inTime = new Date();
+		ticket.setInTime(inTime);
+		ticket.setPrice(0.0);	 
+		ticket.setReductionForRecurrentClient(true);
+        
 		//Assert True 
-		assertTrue(ticket2.isReductionForRecurrentClient());
+		assertTrue(ticket.isReductionForRecurrentClient());
 	}
 	
 	@Test
@@ -111,67 +108,27 @@ class TicketDAOTest {
 	    ticket3.setParkingSpot(parkingSpot);
 	    Date inTime3 = new Date ();
 	    ticket3.setInTime(inTime3);
-	  
-	       
-        dao.saveTicket(ticket3);
-        
-		//Assert False car la voiture GHIJKL n'est jamais entré dans ce parking avant ce test
+	    ticket3.setReductionForRecurrentClient(false);
+	        
 		assertFalse(ticket3.isReductionForRecurrentClient());
 	 
 	}	
 	
 	@Test
-	void savingAticket() throws ClassNotFoundException, SQLException {
-		//on créé un ticket avec les infos demandées en entrée
-		Ticket ticket = new Ticket();
-		ParkingSpot parkingSpot = new ParkingSpot(3, ParkingType.CAR,false);
-		ticket.setParkingSpot(parkingSpot);
-		ticket.setVehicleRegNumber("MNOPQR");
-		Date inTime = new Date();
-		ticket.setInTime(inTime);
-		
-		dao.saveTicket(ticket);
-		
-		String requestTicketId = "select id from ticket where VEHICLE_REG_NUMBER = 'MNOPQR'";
-        Connection con = dataBaseTestConfig.getConnection();
-        PreparedStatement ps = con.prepareStatement(requestTicketId); 
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-		int ticketId = rs.getInt("id");
-		
-		assertEquals(2,ticketId);
+	void savingAticket() {	
+        assertTrue(ticketDAO.saveTicket(ticket));	
 	}
 	
 	@Test
-	void gettingAticket() throws ClassNotFoundException, SQLException {
-
-		String requestTicketId = "select id from ticket where VEHICLE_REG_NUMBER = 'MNOPQR'";
-        Connection con = dataBaseTestConfig.getConnection();
-        PreparedStatement ps = con.prepareStatement(requestTicketId); 
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-		int ticketId = rs.getInt("id");
-		
-		dao.getTicket("MNOPQR");
-		
-		assertEquals(2, ticketId);
+	void gettingAticket() throws SQLException {	
+		when(preparedStatement.executeQuery()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(true);
+		assertEquals(1, ticketDAO.getTicket("ABCDEF").getId());
 	}
 	
-//	@Test
-//	void updatingAticket() throws ClassNotFoundException, SQLException {
-////		String updatingTicket ="update ticket set price = '1.0', OUT_TIME = '2021-05-24 10:29:43' where id = 2";
-////		Connection con = dataBaseTestConfig.getConnection();
-////		PreparedStatement ps = con.prepareStatement(updatingTicket);
-////		ps.execute();
-//		Ticket ticket = new Ticket();
-//		ticket.setVehicleRegNumber("MNOPQR");
-//		ticket.setPrice(1.0);
-//		when(preparedStatement.executeQuery()).thenReturn(resultSet);
-//		when(resultSet.)
-//		
-//		dao.updateTicket(ticket);
-//	
-//		assertEquals();
-//	}
+	@Test
+	void updatingAticket() {
+		assertTrue(ticketDAO.updateTicket(ticket));
+	}	
 	
 }
