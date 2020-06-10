@@ -7,6 +7,7 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,4 +72,20 @@ public class ParkingServiceTest {
     	
     	verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
+
+//    @Test
+//    public void testNextParkingSpotIsNull() {
+//    	Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+//    		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);	
+//        	parkingService.processIncomingVehicle();
+//        	
+//    	});
+//    	String expectedMessage = "";
+//    	String actualMessage = exception.getMessage();
+//    	
+//    	assertTrue(actualMessage.contains(expectedMessage));
+//    }
+   
 }
+
+

@@ -65,7 +65,6 @@ class TicketDAOTest {
 
         //on créé un ticket pour une voiture ABCDEF entrée et sortie.
         ticket = new Ticket();
-        ticket.setId(1);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         ParkingSpot parkingSpot = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR, true);
@@ -80,39 +79,6 @@ class TicketDAOTest {
         ticket.setOutTime(outTime);
     }
 
-
-    
-  
-	@Test
-	void thisVehicleIsRecurrent() throws Exception {  
-		// creating a new ticket and the vehicle is already in the database  
-		Ticket ticket = new Ticket();
-		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);		  
-		ticket.setParkingSpot(parkingSpot);
-		ticket.setVehicleRegNumber("ABCDEF");			 
-		Date inTime = new Date();
-		ticket.setInTime(inTime);
-		ticket.setPrice(0.0);	 
-		ticket.setReductionForRecurrentClient(true);
-        
-		//Assert True 
-		assertTrue(ticket.isReductionForRecurrentClient());
-	}
-	
-	@Test
-	void thisVehicleIsNotRecurrent() {
-		
-		Ticket ticket3 = new Ticket();
-		ticket3.setVehicleRegNumber("GHIJKL");
-		ParkingSpot parkingSpot = new ParkingSpot(3, ParkingType.CAR,false);
-	    ticket3.setParkingSpot(parkingSpot);
-	    Date inTime3 = new Date ();
-	    ticket3.setInTime(inTime3);
-	    ticket3.setReductionForRecurrentClient(false);
-	        
-		assertFalse(ticket3.isReductionForRecurrentClient());
-	 
-	}	
 	
 	@Test
 	void savingAticket() {	
@@ -123,7 +89,10 @@ class TicketDAOTest {
 	void gettingAticket() throws SQLException {	
 		when(preparedStatement.executeQuery()).thenReturn(resultSet);
 		when(resultSet.next()).thenReturn(true);
-		assertEquals(1, ticketDAO.getTicket("ABCDEF").getId());
+		when(resultSet.getInt(1)).thenReturn(1);
+		when(resultSet.getString(6)).thenReturn("CAR");
+		
+		assertNotNull(ticketDAO.getTicket("ABCDEF").getId());
 	}
 	
 	@Test
