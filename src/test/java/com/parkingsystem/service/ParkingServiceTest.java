@@ -37,8 +37,8 @@ public class ParkingServiceTest {
     @BeforeEach
     private void setUpPerTest() {
         try {
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-            when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+        	lenient().when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");            
+            lenient().when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
 
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         } catch (Exception e) {
@@ -48,7 +48,8 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTest(){
+    public void processExitingVehicleTest() {
+        
     	Ticket ticket = new Ticket();
         when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
@@ -65,7 +66,7 @@ public class ParkingServiceTest {
     
     @Test
     public void processIncomingVehicleTest() {
-    	when(inputReaderUtil.readSelection()).thenReturn(1);
+       	when(inputReaderUtil.readSelection()).thenReturn(1);
     	when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(2);
     	
     	parkingService.processIncomingVehicle();
@@ -73,19 +74,28 @@ public class ParkingServiceTest {
     	verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
-//    @Test
-//    public void testNextParkingSpotIsNull() {
-//    	Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-//    		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);	
-//        	parkingService.processIncomingVehicle();
-//        	
-//    	});
-//    	String expectedMessage = "";
-//    	String actualMessage = exception.getMessage();
-//    	
-//    	assertTrue(actualMessage.contains(expectedMessage));
-//    }
-   
+    
+    @Test
+    public void processExitingVehicle_but_updateTicketFailed() {
+    	String expectedMessage = "Unable to process exiting vehicle";    	
+    	try {
+    		parkingService.processExitingVehicle();
+    	}catch(NullPointerException ex) {
+    		assert(ex.getMessage().contains(expectedMessage));
+    	}
+        	
+    }
+    
+    @Test
+    public void getNextParkingNumber_but_isNot_available() {
+    	String expectedMessage = "Error fetching next available parking slot";    	
+    	try {
+    		parkingService.getNextParkingNumberIfAvailable();
+    	}catch(NullPointerException ex) {
+    		assert(ex.getMessage().contains(expectedMessage));
+    	}
+        	
+    }
 }
 
 
