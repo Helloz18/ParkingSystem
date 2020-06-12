@@ -2,7 +2,7 @@ package com.parkit.parkingsystem.model;
 
 import java.util.Date;
 
-public class Ticket {
+public class Ticket implements Cloneable {
 	private int id;
 	private ParkingSpot parkingSpot;
 	private String vehicleRegNumber;
@@ -15,7 +15,8 @@ public class Ticket {
 		return reductionForRecurrentClient;
 	}
 
-	public void setReductionForRecurrentClient(boolean reductionForRecurrentClient) {
+	public void setReductionForRecurrentClient(
+			boolean reductionForRecurrentClient) {
 		this.reductionForRecurrentClient = reductionForRecurrentClient;
 	}
 
@@ -52,18 +53,26 @@ public class Ticket {
 	}
 
 	public Date getInTime() {
-		return inTime;
+		return (Date) inTime.clone();
 	}
 
 	public void setInTime(Date inTime) {
-		this.inTime = inTime;
+		this.inTime = (Date) inTime.clone();
 	}
 
 	public Date getOutTime() {
-		return outTime;
+		if (outTime == null) {
+			return null;
+		} else {
+			return (Date) outTime.clone();
+			}
 	}
 
 	public void setOutTime(Date outTime) {
-		this.outTime = outTime;
+		if (outTime == null) {
+			this.outTime = null;
+		} else {
+			this.outTime = (Date) outTime.clone();
+			}
 	}
 }

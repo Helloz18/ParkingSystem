@@ -76,7 +76,7 @@ public class ParkingServiceTest {
 
     
     @Test
-    public void processExitingVehicle_but_updateTicketFailed() {
+    public void processExitingVehicle_but_Failed() {
     	String expectedMessage = "Unable to process exiting vehicle";    	
     	try {
     		parkingService.processExitingVehicle();
