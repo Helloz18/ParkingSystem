@@ -88,10 +88,10 @@ public class ParkingServiceTest {
     
     @Test
     public void getNextParkingNumber_but_isNot_available() {
-    	String expectedMessage = "Error fetching next available parking slot";    	
+    	String expectedMessage = "Error parsing user input for type of vehicle";    	
     	try {
     		parkingService.getNextParkingNumberIfAvailable();
-    	}catch(NullPointerException ex) {
+    	}catch(IllegalArgumentException ex) {
     		assert(ex.getMessage().contains(expectedMessage));
     	}
         	

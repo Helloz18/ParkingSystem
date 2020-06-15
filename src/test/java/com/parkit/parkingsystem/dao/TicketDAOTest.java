@@ -62,14 +62,16 @@ class TicketDAOTest {
         ticket = new Ticket();
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        ParkingSpot parkingSpot = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR, true);
+        ParkingSpot parkingSpot = new ParkingSpot(
+        		parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), 
+        						ParkingType.CAR, true);
         ticket.setParkingSpot(parkingSpot);
         ticket.setVehicleRegNumber("ABCDEF");
         Date inTime = new Date();
         inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
         ticket.setInTime(inTime);
         ticket.setPrice(1.50);
-        ticket.setReductionForRecurrentClient(true);
+        ticket.setReductionForRecurrentClient(false);
         Date outTime = new Date();
         ticket.setOutTime(outTime);
     }
@@ -77,7 +79,34 @@ class TicketDAOTest {
 	
 	@Test
 	void savingAticket() {	
-        assertTrue(ticketDAO.saveTicket(ticket));	
+        assertTrue(ticketDAO.saveTicket(ticket));
+        assertFalse(ticket.isReductionForRecurrentClient());
+	}
+	
+	@Test
+	void savingAticket_and_recurrentClient() {
+		try {
+			when(preparedStatement.executeQuery()).thenReturn(resultSet);
+			when(resultSet.getInt("count")).thenReturn(2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ticketDAO.saveTicket(ticket);
+        
+        assertTrue(ticket.isReductionForRecurrentClient());
+	}
+	
+	@Test
+	void savingAticket_and_clientIsNotRecurrent() {
+		try {
+			when(preparedStatement.executeQuery()).thenReturn(resultSet);
+			when(resultSet.getInt("count")).thenReturn(0);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ticketDAO.saveTicket(ticket);
+		        
+        assertFalse(ticket.isReductionForRecurrentClient());
 	}
 	
 	@Test

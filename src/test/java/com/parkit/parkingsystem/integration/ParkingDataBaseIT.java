@@ -1,6 +1,5 @@
 package com.parkit.parkingsystem.integration;
 
-import com.parkit.parkingsystem.constants.DBConstants;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
@@ -16,7 +15,6 @@ import constants.DBConstantsTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,7 +30,6 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Date;
 
@@ -114,11 +111,10 @@ public class ParkingDataBaseIT {
 		  assertNotNull(ticketDAO.getTicket("ABCDEF").getOutTime());   
 	  }
 	 
-	  //tester la recurrence ici
 	  @Test
 		void thisVehicleIsRecurrent() throws Exception {  
 		  
-	   //When : The car enters again and has a new ticket
+		  //the car enters and exit the parking
 		  Ticket ticket = new Ticket();
 		  ParkingSpot parkingSpot = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR, false);		  
 		  ticket.setParkingSpot(parkingSpot);
@@ -129,17 +125,31 @@ public class ParkingDataBaseIT {
 		  ticket.setInTime(inTime);
 		  ticket.setPrice(0.0);	 	  	  
 		  ticketDAO.saveTicket(ticket); 
-	        
+		  parkingService.processExitingVehicle();  
+		   //When : The car enters again and has a new ticket
+		  Ticket ticket2 = new Ticket();
+		  ParkingSpot parkingSpot2 = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR, false);		  
+		  ticket2.setParkingSpot(parkingSpot2);
+		  parkingSpotDAO.updateParking(parkingSpot2);		
+		  ticket2.setVehicleRegNumber("ABCDEF");			 
+		  Date inTime2 = new Date();
+		  ticket2.setInTime(inTime2);
+		  ticket2.setPrice(0.0);	
+
 	      Connection con = dataBaseTestConfig.getConnection();				  
 	       	PreparedStatement recurrent = con.prepareStatement(DBConstantsTest.RECURRENT);
-			recurrent.setString(1, ticket.getVehicleRegNumber());
+			recurrent.setString(1, ticket2.getVehicleRegNumber());
 			ResultSet rsRecurrent = recurrent.executeQuery();
 			rsRecurrent.next();
-			int enteredPreviously = rsRecurrent.getInt("count");
-				        
+			int enteredPreviously = rsRecurrent.getInt("count");	
+		  
+		  ticketDAO.saveTicket(ticket2); 
+		 	
+			        
 		//Assert True : the car has more than one ticket in the database
 			assertTrue(enteredPreviously >= 1);
-		}
+			assertTrue(ticket2.isReductionForRecurrentClient());
+			}
 		
 		@Test
 		void thisVehicleIsNotRecurrent() {
@@ -152,5 +162,30 @@ public class ParkingDataBaseIT {
 			assertFalse(ticket.isReductionForRecurrentClient());
 		 
 		}	
+		
+		  @Test
+			void thisVehicle_has_no_previous_ticket() throws Exception {  
+			  
+			  Ticket ticket = new Ticket();
+			  ParkingSpot parkingSpot = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR, false);		  
+			  ticket.setParkingSpot(parkingSpot);
+			  parkingSpotDAO.updateParking(parkingSpot);		
+			  ticket.setVehicleRegNumber("ABCDEF");			 
+			  Date inTime = new Date();
+			  ticket.setInTime(inTime);
+			  ticket.setPrice(0.0);	 	  	
+
+		      Connection con = dataBaseTestConfig.getConnection();				  
+		       	PreparedStatement recurrent = con.prepareStatement(DBConstantsTest.RECURRENT);
+				recurrent.setString(1, ticket.getVehicleRegNumber());
+				ResultSet rsRecurrent = recurrent.executeQuery();
+				rsRecurrent.next();
+				int enteredPreviously = rsRecurrent.getInt("count");
+			  
+			  ticketDAO.saveTicket(ticket);  		
+				        
+				assertEquals(0, enteredPreviously);
+				}
+			
 		
 }

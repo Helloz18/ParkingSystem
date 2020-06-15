@@ -23,7 +23,8 @@ public class TicketDAO {
 		Connection con = null;
 		try {
 			con = dataBaseConfig.getConnection();
-			PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
+			PreparedStatement ps =
+					con.prepareStatement(DBConstants.SAVE_TICKET);
 			try {
 			// ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
 			ps.setInt(1, ticket.getParkingSpot().getId());
