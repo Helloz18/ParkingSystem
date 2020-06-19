@@ -97,7 +97,6 @@ public class ParkingDataBaseIT {
 		ParkingSpot parkingSpot = new ParkingSpot(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR), ParkingType.CAR,
 				false);
 		ticket.setParkingSpot(parkingSpot);
-		parkingSpotDAO.updateParking(parkingSpot);
 		ticket.setVehicleRegNumber("ABCDEF");
 		Date inTime = new Date();
 		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
