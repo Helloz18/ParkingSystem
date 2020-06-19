@@ -8,10 +8,10 @@ import com.parkit.parkingsystem.service.InteractiveShell;
 
 final class App {
 /**
-* logger : used to display a message in the console.
+* logger : used to display messages in the console.
 */
     private static final Logger LOGGER = LogManager.getLogger("App");
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         LOGGER.info("Initializing Parking System");
         InteractiveShell.loadInterface();
     }

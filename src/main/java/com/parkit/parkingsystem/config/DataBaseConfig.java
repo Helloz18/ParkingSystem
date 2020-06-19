@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class DataBaseConfig {
 
-	private static final Logger LOGGER = LogManager.getLogger("DataBaseConfig");
+private static final Logger LOGGER = LogManager.getLogger("DataBaseConfig");
 
 	public Connection getConnection() {
 		LOGGER.info("Create DB connection");
@@ -21,8 +21,9 @@ public class DataBaseConfig {
 
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			fis = new FileInputStream("src/main/resources/jdbc.properties");
-			props.load(fis);	
+			fis = new FileInputStream(
+					"src/main/resources/jdbc.properties");
+			props.load(fis);
 			fis.close();
 
 			con = DriverManager.getConnection(

@@ -15,8 +15,7 @@ public class Ticket implements Cloneable {
 		return reductionForRecurrentClient;
 	}
 
-	public void setReductionForRecurrentClient(
-			boolean reductionForRecurrentClient) {
+	public void setReductionForRecurrentClient(boolean reductionForRecurrentClient) {
 		this.reductionForRecurrentClient = reductionForRecurrentClient;
 	}
 
@@ -65,7 +64,7 @@ public class Ticket implements Cloneable {
 			return null;
 		} else {
 			return (Date) outTime.clone();
-			}
+		}
 	}
 
 	public void setOutTime(Date outTime) {
@@ -73,6 +72,6 @@ public class Ticket implements Cloneable {
 			this.outTime = null;
 		} else {
 			this.outTime = (Date) outTime.clone();
-			}
+		}
 	}
 }
